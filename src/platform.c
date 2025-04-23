@@ -1,4 +1,5 @@
 #include "../include/platform.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -47,16 +48,14 @@ sp_file sp_OpenFile(const char* file, sp_file_mode mode, sp_file_flags flags, sp
     return fd;
 }
 
+void sp_ResizeFile(sp_file file, spf_metadata* meta, uint64_t newsize) {
+    ftruncate(file, newsize);
+    meta->size = newsize;
+}
+
 void sp_CloseFile(sp_file file) {
     close(file);
 }
-
-
-typedef struct spm_mem_head {
-    uint64_t size;
-    char data[];
-} spm_mem_head;
-
 
 void* sp_MemMapFile(sp_file f, spf_metadata meta, sp_map_flags flags) {
     int prot = 0;
@@ -81,4 +80,39 @@ void* sp_MemMapFile(sp_file f, spf_metadata meta, sp_map_flags flags) {
 
 void sp_UnMapFile(void* data, spf_metadata meta) {
     munmap(data, meta.size);
+}
+
+typedef struct page_head {
+    uint64_t size;
+    char data[];
+} page_head;
+
+void* sp_PageAlloc(uint64_t size) {
+    size += sizeof(page_head);
+    page_head* block = mmap(NULL, size, PROT_READ | PROT_WRITE,
+                            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0); 
+    block->size = size;
+    return block->data;
+}
+
+void  sp_PageFree(void* p) {
+    page_head* block = p;
+    block -= 1;
+    munmap(block, block->size);
+}
+
+void sp_Printf(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+}
+
+
+void sp_fPrintf(sp_file f, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    //file descriptor version
+    vdprintf(f, format, args);
+    va_end(args);
 }

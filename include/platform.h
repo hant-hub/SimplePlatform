@@ -33,6 +33,7 @@ typedef struct spf_metadata {
 } spf_metadata;
 
 sp_file sp_OpenFile(const char* file, sp_file_mode mode, sp_file_flags flags, spf_metadata* meta);
+void sp_ResizeFile(sp_file file, spf_metadata* meta, uint64_t newsize);
 void sp_CloseFile(sp_file file);
 
 typedef enum sp_map_flags {
@@ -47,6 +48,17 @@ typedef enum sp_map_flags {
 void* sp_MemMapFile(sp_file f, spf_metadata meta, sp_map_flags flags);
 void sp_UnMapFile(void* data, spf_metadata meta);
 
+void* sp_PageAlloc(uint64_t size);
+void  sp_PageFree(void* p);
 
+//On windows this will open a terminal if one does not
+//already exist, on Linux this will just redirect
+//to normal printf
+void sp_Printf(const char* format, ...);
+
+//This takes in the raw file descriptor and writes to it
+//The main difference is that on windows it would be a
+//void* HANDLE
+void sp_fPrintf(sp_file f, const char* format, ...);
 
 #endif
