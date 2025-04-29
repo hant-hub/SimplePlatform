@@ -10,6 +10,7 @@ int main(int argc, char* argv[]) {
     //quick compile_flags.txt
     SB_FHANDLE f = sb_fopen("compile_flags.txt", "w+");
     sb_fprintf(f, "-Iinclude");
+    printf("hit\n");
 
     //create build dir
     sb_mkdir("build");

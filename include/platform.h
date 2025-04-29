@@ -7,8 +7,14 @@
 #include <sys/types.h>
 
 //platform dependent------------
+#ifdef _MSC_VER
+typedef void* sp_file;
+typedef void* sp_process;
+#else
 typedef int sp_file;
 typedef pid_t sp_process;
+#endif
+
 //------------------------------
 
 typedef uint32_t Bool32;
@@ -30,6 +36,8 @@ typedef enum sp_file_flags {
 
 typedef struct spf_metadata {
     uint64_t size;
+    //windows metadata
+    void* private;
 } spf_metadata;
 
 sp_file sp_OpenFile(const char* file, sp_file_mode mode, sp_file_flags flags, spf_metadata* meta);

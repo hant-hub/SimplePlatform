@@ -174,6 +174,50 @@ void sb_rebuild_self(int argc, char* argv[], const char* srcpath) {
     return;
 }
 
+SB_FHANDLE sb_fopen(char* file, char* mode) {
+    DWORD access = 0;
+    DWORD create = OPEN_EXISTING;
+    while (mode[0]) {
+        if (mode[0] == 'w') access |= GENERIC_WRITE;
+        if (mode[0] == 'r') access |= GENERIC_READ;
+        if (mode[0] == '+') create = CREATE_ALWAYS;
+        if (mode[0] == 'a') {
+            access |= GENERIC_WRITE;
+        }
+        mode++;
+    }
+
+    SB_FHANDLE f = CreateFile(file, access, 0, NULL, create, FILE_ATTRIBUTE_NORMAL, NULL);
+    return f;
+}
+
+void sb_fclose(SB_FHANDLE h) { 
+    CloseHandle(h);
+}
+
+//set up for now, do more research later,
+//maybe set up automatical console allocation
+//later?
+void sb_fprintf(SB_FHANDLE h, char* format, ...) {
+    char buffer[1024] = {0};
+    va_list args;
+    va_start(args, format);
+    DWORD chars = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    WriteFile(h, buffer, chars, NULL, NULL);
+}
+
+// Super platform specific
+// definitely needs platform
+// stuff
+// Non-recursive
+void sb_mkdir(char* path) {
+    //full public
+    if (CreateDirectory(path, NULL)) {
+        printf("Error: %ld\n", GetLastError());
+    }
+}
+
 #else
 #include <sys/types.h>
 #include <sys/wait.h>
