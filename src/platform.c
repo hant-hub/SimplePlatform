@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+
 #include "../include/platform.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -26,7 +28,7 @@ sp_file sp_OpenFile(const char* file, sp_file_mode mode, sp_file_flags flags, sp
     }
 
     if (flags & spf_TRUNC) {
-        flag |= O_APPEND;
+        flag |= O_TRUNC;
     }
 
     if (flags & spf_CREAT) {
@@ -115,4 +117,28 @@ void sp_fPrintf(sp_file f, const char* format, ...) {
     //file descriptor version
     vdprintf(f, format, args);
     va_end(args);
+}
+
+void* sp_HeapAlloc(uint64_t size) {
+    return malloc(size);
+}
+
+void* sp_HeapRealloc(void* p, uint64_t size) {
+    return realloc(p, size);
+}
+
+void* sp_HeapCalloc(uint64_t size) {
+    return calloc(size, 1);
+}
+
+void sp_HeapFree(void* p) {
+    free(p);
+}
+
+void sp_Chdir(const char* dir) {
+    chdir(dir);
+}
+
+void sp_Mkdir(const char* dir) {
+    mkdir(dir, 0664);
 }
